@@ -1,5 +1,9 @@
 const dojotLibs = require('./index');
 const express = require('express');
+const path = require('path');
+
+let filename = path.basename(__filename);
+
 
 //defining log
 var logger = dojotLibs.logger;
@@ -8,7 +12,7 @@ var logger = dojotLibs.logger;
 const app = express();
 
 //setting log debug route to app
-dojotLibs.loggerRoute(app);
+dojotLibs.loggerRoute(app, filename);
 
 
 
