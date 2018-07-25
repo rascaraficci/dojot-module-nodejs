@@ -32,7 +32,6 @@ const logger = winston.createLogger({
     ),
     transports: [
         new winston.transports.Console({
-            name: 'meu nome',
             level: 'debug',
             handleExceptions: true
         })
@@ -46,10 +45,6 @@ const loggerRoute = function(app, filename){
         if (req.query.level && (debugLevels.indexOf(req.query.level) >= 0)) {
             res.set(200).send("Level of debugger is set to " + req.query.level);
             logger.transports[0].level = req.query.level;
-            logger.debug("debug", {filename});
-            logger.info("info", {filename});
-            logger.warn("warn", {filename});
-            logger.error("error", {filename});
         } else {
             res.status(400).send("undefined level of debugger");
         }
