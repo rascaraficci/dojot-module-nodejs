@@ -69,8 +69,7 @@ describe("Test logger module" , () => {
           });
           transport = new winston.transports.SpyTransport({ spy });
       
-          // This example uses the default logger of winston, but you can also use
-          // your own configured logger with `winston.createLogger`.
+
           logger.add(consoleTransport);
           logger.add(transport);
         });
@@ -85,6 +84,11 @@ describe("Test logger module" , () => {
           
               assume(spy.calledOnce).true();
               assume(spy.calledWith(info)).true();
+        });
+
+        after(() => {
+            logger.remove(consoleTransport);
+            logger.remove(transport);
         });
     });
 });
