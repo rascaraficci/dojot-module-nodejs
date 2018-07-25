@@ -4,35 +4,34 @@ const winston = require('winston');
 const moment = require('moment');
 const express = require('express');
 const path = require('path');
-const { combine, printf, colorize} = winston.format;
+const { combine, printf, timestamp, colorize} = winston.format;
 
 /*Setting timestamp*/
 moment.locale('pt-br');
-var timestamp =  moment().format('HH:mm:ss DD/MM/YYYY');
 
-/*Name of the current file*/
-let fileName = path.basename(__filename);
 
 /* Levels of debug */
 let debugLevels = ['debug', 'info', 'warn', 'error'];
 
 /*Logs print format*/
 var myFormat = printf(info => {
-    return `<${timestamp}> |${fileName}| ${info.level}: ${info.message}`;
+    return `<${info.timestamp}> ${info.level}: ${info.message}`;
 });
 
 /*Instance logging*/
 const logger = winston.createLogger({
     format: combine(
         winston.format(info => {
-            info.level= info.level.toUpperCase()
+            info.level= info.level.toUpperCase();
             return info;
         })(),
+        timestamp({format: 'HH:mm:ss DD/MM/YYYY'}),
         colorize(),
         myFormat
     ),
     transports: [
         new winston.transports.Console({
+            name: 'meu nome',
             level: 'debug',
             handleExceptions: true
         })
@@ -46,7 +45,7 @@ const loggerRoute = function(app){
         if (req.query.level && (debugLevels.indexOf(req.query.level) >= 0)) {
             res.set(200).send("Level of debugger is set to " + req.query.level);
             logger.transports[0].level = req.query.level;
-            logger.debug("debug");
+            logger.debug("debug", {session: 'test'});
             logger.info("info");
             logger.warn("warn");
             logger.error("error");
@@ -56,5 +55,6 @@ const loggerRoute = function(app){
     });
 
 }
+
 
 module.exports = {logger, loggerRoute};
