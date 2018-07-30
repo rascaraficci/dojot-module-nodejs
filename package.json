@@ -4,7 +4,7 @@
   "description": "A library that provides utilities and methods for dojot",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/*.test.js"
+    "test": "mocha tests/*.test.js --exit"
   },
   "keywords": [
     "dojot"
