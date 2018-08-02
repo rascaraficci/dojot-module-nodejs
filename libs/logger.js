@@ -39,6 +39,12 @@ function formatParams(info) {
  * 
  * The level severity of logs can be changed via runtime by a http request into: '.../setLog?level={level of your debug}'.
  * This modules provides a route via express routes for runtime log level change.
+ * 
+ * an example to create a customized logger:
+ * logger.debug("Will initialize ingestion handler device-data at topic f968b47f-6db7-4434-9e9c-175feb42c68b", {filename: "your module name"})
+ * 
+ * the response will be:
+ * <19:48:14 02/08/2018> -- |your module name| -- DEBUG: Will initialize ingestion handler device-data at topic f968b47f-6db7-4434-9e9c-175feb42c68b.
  */
   
 const logger = winston.createLogger({
