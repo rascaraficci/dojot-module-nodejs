@@ -1,11 +1,6 @@
 /*Dojot Logger Library*/
 const winston = require('winston');
-const moment = require('moment');
-const express = require('express');
-const { combine, printf, timestamp, colorize} = winston.format;
-
-/*Setting timestamp*/
-moment.locale('pt-br');
+const { combine, timestamp, colorize} = winston.format;
 
 /* Levels of debug */
 let debugLevels = ['debug', 'info', 'warn', 'error'];
