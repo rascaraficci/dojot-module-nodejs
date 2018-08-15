@@ -5,34 +5,86 @@ class Consumer {
   constructor() {
     console.log('Creating a new Kafka consumer...');
     this.consumer = new Kafka.KafkaConsumer(config.kafka.consumer);
-    this.initConsumer();
   }
 
-  initConsumer() {
-    console.log('Connecting the consumer to broker...');
-    this.consumer.connect();
+  connect() {
+
+    console.log("Connecting the consumer ..")
+    const readyPromise = new Promise((resolve, reject) => {
+      const timeoutTrigger = setTimeout(() => {
+          console.error("Failed to connect the consumer.");
+          reject();
+      }, 1000);
+
+      this.consumer.on("ready", () => {
+          console.log("Consumer is connected");
+          clearTimeout(timeoutTrigger);
+          resolve();
+      });
+  });
+
+    this.consumer.connect(null);
+    return readyPromise;
   }
 
   subscribe(topic) {
-    this.consumer.on('ready', () => {
+    this.consumer.subscribe([topic]);
+    console.log(`Subscribed to topic ${topic}`);
+  }
 
-      // This makes subsequent consumes read from that topic.
-      this.consumer.subscribe([topic]);
-      console.log('Message found!  Contents below.');
+  consume(maxMessages = 1) {
+    return new Promise((resolve, reject) => {
+      this.consumer.consume(maxMessages, (err, messages) => {
+        if (err) {
+          reject(err);
+        } else {
 
-      // Read one message every 50 milliseconds
-      setInterval(() => {
-        this.consumer.consume(1);
-      }, 50);
+          if (messages != []) {
+            
+          }
+          console.log("Message consumed!");
+          resolve(messages);
+        }
+      });
+    });
+  }
 
-    }).on('data',(data) => {
-      console.log(data.value.toString());
+  onMessageListener(callback) {
+        this.consumer.consume();
+        this.consumer.on('data', (messages) => {
+          callback(messages);
+        });
+  }
+
+  commit() {
+    this.consumer.commit(null);
+  }
+
+  disconnect() {
+    const disconnectPromise = new Promise((resolve, reject) => {
+      const timeoutTrigger = setTimeout(() => {
+        console.error("Unnable to disconnect the consumer.");
+        reject();
+      }, 100000);
+
+      this.consumer.disconnect((err, info) => {
+
+        if (err) {
+          console.error(err);
+          reject(err);
+        } else {
+          console.log("disconnected!");
+          clearTimeout(timeoutTrigger);
+          resolve(info);
+        }
+      });
     });
 
+    return disconnectPromise;
   }
 
 }
 
-
 module.exports = Consumer;
  
+

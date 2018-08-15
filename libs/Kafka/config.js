@@ -15,18 +15,7 @@ module.exports={
 
         consumer: {
             'group.id': 'kafka',
-            'metadata.broker.list': 'localhost:9092',
-            'offset_commit_cb': (err, topicPartitions) => {
-           
-              if (err) {
-                // There was an error committing
-                console.error(err);
-              } else {
-                // Commit went through. Let's log the topic partitions
-                console.log(topicPartitions);
-              }
-           
-            }
+            'metadata.broker.list': 'localhost:9092'
         }
     }
 }

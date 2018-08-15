@@ -6,54 +6,103 @@ class Producer {
   constructor() {
     console.log('Creating a new Kafka producer...');
     this.producer = new Kafka.Producer(config.kafka.producer);
-
-    console.log('Initing Kafka producer...');
-    this.initProducer();
-
+    this.sendCallback();
   }
 
-  initProducer() {
+  connect() {
+    const readyPromise = new Promise((resolve, reject) => {
+      const timeoutTrigger = setTimeout(() => {
+        console.error("Failed to connect the producer.");
+        reject();
+      }, 1000);
 
-    // Connect to the broker manually
-
-    console.log('Connecting the producer to broker...');
-    this.producer.connect();
-
-    // Any errors we encounter, including connection errors
-    this.producer.on('event.error', err => {
-      console.error('Error from producer');
-      console.error(err);
+      this.producer.on("ready", () => {
+          console.log("Producer is ready.");
+          clearTimeout(timeoutTrigger);
+          resolve();
+      });
     });
 
+    this.producer.connect(null);
+    return readyPromise;
   }
 
-  sendMessage(message, topic, partition = -1, keyed = null) {
+  produce(topic, message, key=null, partition=null) {
+    return new Promise((resolve, reject) => {
+      
+      const timeStamp = Date.now();
 
-    // Wait for the ready event before proceeding
-    this.producer.on('ready', () => {
-      console.log(`Producer connected. Trying to send a message to topic ${topic}`);
-      let bufferedMessage = new Buffer(message);
+      const buffer = new Buffer(message);
 
-      try {
-        this.producer.produce(topic, partition, bufferedMessage, keyed, Date.now());
-        console.log('Message was sent!');
-      } catch (err) {
-        console.error('A problem occurred when sending our message');
-        console.error(err);
+      const callback = {resolve, reject};
+
+      this.producer.produce(topic, partition, buffer, key, timeStamp, {callback});
+
+      //Poll events emit for delivery reports
+      this.producer.poll();
+    });
+  }
+
+  /*Flush the librdkafka internal queue, sending all messages. Default timeout is 500ms*/
+  _flush(timeout=500) {
+    return new Promise((resolve, reject) => {
+      this.producer.flush(timeout, err => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log("All messages is flushed.");
+          resolve();
+        }
+      });
+    });
+  }
+
+  async disconnect() {
+
+    try {
+      await this._flush();
+    } catch (error) {
+      console.error("Error on flush message in Kafka", err);
+      throw err;
+    }
+    
+    console.log("Flush done, disconnecting the producer...");
+
+    const disconnectPromise = new Promise((resolve, reject) => {
+      const timeoutTrigger = setTimeout(() => {
+        console.error("Unable to disconnect the producer");
+        reject();
+      }, 10000);
+
+      this.producer.disconnect((err) => {
+        clearTimeout(timeoutTrigger);
+
+        if (err) {
+          console.error(err);
+        } else {
+          console.log('disconnected');
+          resolve();
+        }
+      });
+    });
+
+    return disconnectPromise;
+  }
+
+  _resolveOnDeliveryReport(err, report) {
+    if (report.opaque.callback) {
+      if (err) {
+        report.opaque.callback.reject(err); 
+
+      }else {
+        report.opaque.callback.resolve(report);
       }
-    
-    });
-
+    }
   }
 
-  disconnectProducer() {
-    console.log("Disconnecting the producer...");
-    this.producer.disconnect();
-
-    producer.on('disconnected', (arg) => {
-      console.log('producer disconnected. ' + JSON.stringify(arg));
-    });
-    
+  sendCallback() {
+    this.producer.on("delivery-report", this._resolveOnDeliveryReport);
+    this.producer.setPollInterval(100);
   }
 
 }
