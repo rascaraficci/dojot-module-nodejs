@@ -1,0 +1,28 @@
+{
+  "name": "dojot-libs",
+  "version": "1.0.0",
+  "description": "A library that provides utilities and methods for dojot",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha tests/*.test.js --exit"
+  },
+  "keywords": [
+    "dojot"
+  ],
+  "author": "Muhamed Avila",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "express": "^4.16.3",
+    "moment": "^2.22.2",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {
+    "@chrisalderson/winston-spy": "^1.0.2",
+    "assume": "^2.1.0",
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "expect": "^23.4.0",
+    "mocha": "^5.2.0",
+    "sinon": "^6.1.4"
+  }
+}
