@@ -1,11 +1,10 @@
 const Kafka = require('node-rdkafka');
-const config = require('./config');
 
 class Producer {
 
-  constructor() {
+  constructor(producerConfig) {
     console.log('Creating a new Kafka producer...');
-    this.producer = new Kafka.Producer(config.kafka.producer);
+    this.producer = new Kafka.Producer(producerConfig);
     this.sendCallback();
   }
 

@@ -1,3 +1,5 @@
+/* For tests only */
+
 module.exports={
     kafka: {
         producer: {

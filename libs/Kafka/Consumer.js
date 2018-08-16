@@ -1,10 +1,10 @@
 const Kafka = require('node-rdkafka');
-const config = require('./config');
+
 class Consumer {
 
-  constructor() {
+  constructor(consumerConfig) {
     console.log('Creating a new Kafka consumer...');
-    this.consumer = new Kafka.KafkaConsumer(config.kafka.consumer);
+    this.consumer = new Kafka.KafkaConsumer(consumerConfig);
   }
 
   connect() {
