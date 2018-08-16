@@ -19,5 +19,8 @@ module.exports={
             'group.id': 'kafka',
             'metadata.broker.list': 'localhost:9092'
         }
+    },
+    databroker: {
+      host: "http://localhost:8005"
     }
 }
