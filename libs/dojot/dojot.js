@@ -4,6 +4,7 @@ var Producer = require("../Kafka/Producer");
 var defaultConfig = require("../Kafka/config");
 var uuid = require("uuid");
 var util = require("util");
+var logger = require("../Log/logger").logger;
 
 const DefaultSubjects = {
   TENANCY: "dojot.tenancy",
@@ -27,7 +28,7 @@ class dojot {
     producer["client.id"] = this.instanceId;
     this.producer = new Producer(producer);
     this.producer.connect().then(() => {
-      console.log(`Producer for module ${this.instanceId} is ready.`);
+      logger.info(`Producer for module ${this.instanceId} is ready.`);
     });
 
     // This should only get new messages.
@@ -37,6 +38,9 @@ class dojot {
 
     let processNewTenantCbk = this._processNewTenant.bind(this);
     this.on(DefaultSubjects.TENANCY, "message", processNewTenantCbk);
+
+    // There should be a auth call here, to get all previous configured
+    // tenants.
   }
 
   /**
@@ -47,26 +51,26 @@ class dojot {
    * @param {string} msg The message describing the new tenant.
    */
   _processNewTenant(tenant, msg) {
-    console.log(`Received message in tenancy subject.`);
-    console.log(`Tenant is: ${tenant}`);
-    console.log(`Message is: ${util.inspect(msg, {depth: null})}`);
+    logger.debug(`Received message in tenancy subject.`);
+    logger.debug(`Tenant is: ${tenant}`);
+    logger.debug(`Message is: ${util.inspect(msg, {depth: null})}`);
 
     let data;
     try {
       data = JSON.parse(msg);
     } catch (error) {
-      console.log("Data is not a valid JSON. Bailing out.");
-      console.log(`Error is: ${error}`);
+      logger.warn("Data is not a valid JSON. Bailing out.");
+      logger.warn(`Error is: ${error}`);
       return;
     }
 
     // Perform some sanity checks here
     if (!("tenant" in data)) {
-      console.log("Received message is invalid. Bailing out.");
+      logger.warn("Received message is invalid. Bailing out.");
       return;
     }
     if (this.tenants.indexOf(data.tenant) != -1) {
-      console.log("This tenant was already registered. Bailing out.");
+      logger.warn("This tenant was already registered. Bailing out.");
       return;
     }
 
@@ -78,16 +82,15 @@ class dojot {
   }
 
   emit(subject, tenant, event, data) {
-    console.log(`Emitting new event ${event} for subject ${subject}@${tenant}`);
-    console.log(`Current callback mapping is: ${util.inspect(this.eventCallbacks, {depth: null})}`);
+    logger.debug(`Emitting new event ${event} for subject ${subject}@${tenant}`);
     // Sanity checks
     if (!(subject in this.eventCallbacks)) {
-      console.log(`No one is listening to subject ${subject} events.`);
+      logger.debug(`No one is listening to subject ${subject} events.`);
       return;
     }
 
     if (!(event in this.eventCallbacks[subject])) {
-      console.log(`No one is listening to subject ${subject} ${event} events.`);
+      logger.debug(`No one is listening to subject ${subject} ${event} events.`);
       return;
     }
     // Maybe we should use async.parallel or async.waterfall here?
@@ -106,7 +109,7 @@ class dojot {
    * @param {function} callback
    */
   on(subject, event, callback) {
-    console.log(`Registering new callback for subject ${subject} and event ${event}`);
+    logger.debug(`Registering new callback for subject ${subject} and event ${event}`);
     if (!(subject in this.eventCallbacks)) {
       this.eventCallbacks[subject] = {};
     }
@@ -119,20 +122,18 @@ class dojot {
   }
 
   _bootstrapTenant(subject, tenant, mode, isGlobal = false, config = defaultConfig.kafka) {
-    console.log(`Bootstraping tenant ${tenant} for subject ${subject}.`);
-    console.log(`Global: ${isGlobal}, mode ${mode}`);
+    logger.info(`Bootstraping tenant ${tenant} for subject ${subject}.`);
+    logger.info(`Global: ${isGlobal}, mode ${mode}`);
     let processKafkaMessagesCbk = (messages) => {
       this._processKafkaMessages(subject, tenant, messages);
     };
 
     this.topicManager.getTopic(subject, tenant, defaultConfig.databroker.host, isGlobal).then((topic) => {
-      console.log(`topics: ${util.inspect(this.topics)}`);
       if (this.topics.indexOf(topic) != -1) {
-        console.log(`There is already a consumer for this topic ${topic}.`);
-        console.log(`Moving on.`);
+        logger.warn(`There is already a consumer for this topic ${topic}. Moving on.`);
         return;
       }
-      console.log(`Got topic for subject ${subject} and tenant ${tenant}: ${topic}`);
+      logger.debug(`Got topic for subject ${subject} and tenant ${tenant}: ${topic}`);
       this.topics.push(topic);
       if (mode.indexOf('r') != -1) {
         let consumer = new Consumer(config.consumer);
@@ -143,12 +144,11 @@ class dojot {
       }
 
       if (mode.indexOf('w') != -1) {
-        console.log("Adding a producer topic.");
+        logger.debug("Adding a producer topic.");
         if (!(subject in this.producerTopics)) {
           this.producerTopics[subject] = {};
         }
         this.producerTopics[subject][tenant] = topic;
-        console.log(`Current producer topics are ${util.inspect(this.producerTopics, {depth: null})}`);
       }
     });
   }
@@ -163,7 +163,7 @@ class dojot {
    * @param {object} config The Kafka topic configuration.
    */
   createChannel(subject, mode, isGlobal, config = defaultConfig.kafka) {
-    console.log(`Creating channel for subject ${subject}`);
+    logger.info(`Creating channel for subject ${subject}`);
     let associatedTenants = [];
     if (isGlobal === true) {
       associatedTenants = ["management"];
@@ -180,19 +180,19 @@ class dojot {
 
   _processKafkaMessages(subject, tenant, messages) {
     // for (const message of messages) {
-      console.log(`received message: ${util.inspect(messages, {depth: null})} `);
+      logger.debug(`Received message: ${util.inspect(messages, {depth: null})} `);
       this.emit(subject, tenant, "message", messages.value.toString("utf-8"));
     // }
   }
 
   publish(subject, tenant, message) {
-    console.log(`Trying to publish someting.Current producer topics are ${util.inspect(this.producerTopics, {depth: null})}`);
+    logger.debug(`Trying to publish someting. Current producer topics are ${util.inspect(this.producerTopics, {depth: null})}`);
     if (!(subject in this.producerTopics)) {
-      console.log(`No producer was created for subject ${subject}. Maybe it was not registered?`);
+      logger.warn(`No producer was created for subject ${subject}. Maybe it was not registered?`);
       return;
     }
     if (!(tenant in this.producerTopics[subject])) {
-      console.log(`No producer was created for subject ${subject}@${tenant}. Maybe this tenant doesn't exist?`);
+      logger.warn(`No producer was created for subject ${subject}@${tenant}. Maybe this tenant doesn't exist?`);
       return;
     }
 
