@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha tests/*.test.js --exit",
-    "dojot": "node libs/dojot/sample.js"
+    "dojot": "node lib/sample.js"
   },
   "keywords": [
     "dojot"
