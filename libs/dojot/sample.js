@@ -6,8 +6,6 @@ var logger = require("../Log/logger").logger;
 
 
 dojot.createChannel("device-data", "rw");
-dojot.createChannel("dojot.device-manager.device", "r");
-dojot.createChannel("dojot.device-manager.statistics", "r");
 dojot.createChannel("dojot.tenancy", "r", true);
 
 dojot.on("device-data", "message", (tenant, msg) => {
@@ -40,7 +38,7 @@ let sendMessage = () => {
   dojot.publish("device-data", "admin", msg);
   setTimeout(() => {
     sendMessage();
-  }, 1000);
+  }, 10000);
 };
 
 sendMessage();

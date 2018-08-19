@@ -119,6 +119,10 @@ class dojot {
     }
 
     this.eventCallbacks[subject][event].push(callback);
+
+    if (!(subject in this.subjects) && !(subject in this.globalSubjects)) {
+      this.createChannel(subject);
+    }
   }
 
   _bootstrapTenant(subject, tenant, mode, isGlobal = false, config = defaultConfig.kafka) {
@@ -162,7 +166,7 @@ class dojot {
    * (is it group by tenants, such as in "device-data" subject, or not, such as in "dojot.tenancy"?)
    * @param {object} config The Kafka topic configuration.
    */
-  createChannel(subject, mode, isGlobal, config = defaultConfig.kafka) {
+  createChannel(subject, mode = "r", isGlobal = false, config = defaultConfig.kafka) {
     logger.info(`Creating channel for subject ${subject}`);
     let associatedTenants = [];
     if (isGlobal === true) {
