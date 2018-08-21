@@ -1,4 +1,4 @@
-const dojotLibs = require('../index');
+const {Logger, KafkaConsumer, KafkaProducer} = require('../index');
 const assume = require('assume');
 
 const express = require('express');
@@ -17,13 +17,13 @@ chai.use(chaiHttp);
 let filename = path.basename(__filename);
 
 //defining log
-var logger = dojotLibs.logger;
+var logger = Logger.logger;
 
 //defining app express
 const app = express();
 
 //setting log debug route to app
-dojotLibs.loggerRoute(app, filename);
+Logger.loggerRoute(app, filename);
 
 app.listen(3000, () => {});
 
