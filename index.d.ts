@@ -44,7 +44,7 @@ declare module '@dojot/dojot-module' {
         connect(): void;
         subscribe(topic: string): void;
         consume(maxMessages?: number): Promise<any>;
-        onMessageListener(callback: (data: any) => void): void;
+        // onMessageListener(callback: (data: any) => void): void;
         commit(): void;
         disconnect(): Promise<any>;
     }
