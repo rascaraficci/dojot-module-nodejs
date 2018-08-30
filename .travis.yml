@@ -5,23 +5,14 @@ language: node_js
 node_js:
   - 8
 
-env:
-  global:
-  - ZOOKEEPER_PEERS=localhost:2181
-  - KAFKA_HOSTS=localhost:9092
-  
-before_install:
-- wget http://www-eu.apache.org/dist/kafka/2.0.0/kafka-2.0.0-src.tgz -O kafka.tgz
-- mkdir -p kafka && tar xzf kafka.tgz -C kafka --strip-components 1
-- nohup bash -c "cd kafka && bin/zookeeper-server-start.sh config/zookeeper.properties &"
--sleep 5
-- nohup bash -c "cd kafka && bin/kafka-server-start.sh config/server.properties &"
--sleep 5
-
 cache:
   directories:
     - node_modules
 
-script:
+install:
   - npm i
-  - npm run test
+
+script:
+  - docker build -t dojot/dojot_module_tests -f ./tests/docker/DockerFile .
+  - docker-compose -f ./tests/docker/docker-compose.yml up -d
+  
