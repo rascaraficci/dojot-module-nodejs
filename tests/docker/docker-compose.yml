@@ -19,10 +19,113 @@ services:
       driver: json-file
       options:
         max-size: 100m
+
+  data-broker:
+    image: dojot/data-broker
+    restart: always
+    depends_on:
+      - kafka
+      - data-broker-redis
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  data-broker-redis:
+    image: redis:alpine
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  postgres:
+    image: "postgres:9.4-alpine"
+    restart: always
+    environment:
+      POSTGRES_USER: "kong"
+      POSTGRES_DB: "kong"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  auth:
+    image: dojot/auth:v0.3.0-beta.1
+    restart: always
+    depends_on:
+      - apigw
+      - postgres
+      - auth-redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AUTH_DB_HOST: "postgres"
+      AUTH_DB_USER: "kong"
+      AUTH_KONG_URL: "http://apigw:8001"
+      AUTH_CACHE_HOST: "auth-redis"
+      # This is used to select the type of cache to be used. Allowed values are "redis" or "nocache"
+      AUTH_CACHE_NAME: "redis"
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+    
+  apigw:
+    image: dojot/kong:v0.2.1
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kong-migration:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    environment:
+      KONG_DATABASE: "postgres"
+      KONG_PG_HOST: "postgres"
+    volumes:
+      - ./apigw/plugins/pep-kong:/plugins/pep-kong:Z
+      - ./apigw/plugins/mutualauthentication:/plugins/mutualauthentication:Z
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
+
+  auth-redis:
+    image: redis:alpine
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 100m
   
-  dojot-module-test:
-      image: "dojot/dojot_module_tests"
+  kong-migration:
+    image: dojot/kong:v0.2.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=postgres
+    command: kong migrations up
+    restart: on-failure
+
+      
+  dojot-module_test:
+      image: "dojot/dojot-module_tests"
       depends_on:
         - kafka
+        - auth
+        - data-broker
       environment:
         KAFKA_HOSTS: kafka
+        DATA_BROKER_URL: http://data-broker
+        AUTH_URL: http://auth:5000
+        
