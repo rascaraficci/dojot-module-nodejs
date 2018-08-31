@@ -23,10 +23,18 @@ describe('Create messenger', () => {
         expect(messenger.consumer).toBeDefined();
     });
 
-    it("Should got tenants", () => {
+    it("Should get tenants", () => {
         messenger.emit('dojot.tenancy', 'admin', 'message', JSON.stringify({ tenant: 'test' }));
         expect(messenger.tenants.length).toBeGreaterThan(0);
         expect(messenger.tenants[0]).toEqual('test');
+    });
+
+    it("Should get correct topics", (done) => {
+        messenger.topicManager.getTopic('dojot-tenancy', 'dojot-management', config.databroker.host, true).then(topic => {
+            expect(topic).toBeDefined();
+            done();
+
+        });
     })
 
     it("Emiting and receiving a message", (done) => {
