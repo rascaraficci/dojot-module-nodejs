@@ -15,4 +15,3 @@ install:
 script:
   - docker build -t dojot/dojot-module_tests -f ./tests/docker/DockerFile .
   - docker-compose -f ./tests/docker/docker-compose.yml up -d
-  
