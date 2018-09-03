@@ -69,7 +69,7 @@ services:
       driver: json-file
       options:
         max-size: 100m
-    
+
   apigw:
     image: dojot/kong:v0.2.1
     restart: always
@@ -98,7 +98,7 @@ services:
       driver: json-file
       options:
         max-size: 100m
-  
+
   kong-migration:
     image: dojot/kong:v0.2.1
     depends_on:
@@ -109,7 +109,7 @@ services:
       - KONG_PG_HOST=postgres
     command: kong migrations up
     restart: on-failure
-       
+
   dojot-module_test:
       image: "dojot/dojot-module_tests"
       depends_on:
