@@ -52,4 +52,5 @@ declare module '@dojot/dojot-module' {
     }
 
     var logger: winston.Logger;
+    var loggerRoute: (app: any, filename: string) => void;
 }
