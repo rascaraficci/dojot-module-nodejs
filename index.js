@@ -5,4 +5,5 @@ module.exports = {
     Messenger: require("./lib/messenger").Messenger,
     Config: require("./lib/config"),
     Auth: require("./lib/auth"),
+    logger: require("./lib/log/logger").logger
 };
