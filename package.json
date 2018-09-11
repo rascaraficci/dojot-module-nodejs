@@ -7,10 +7,19 @@
     "test": "mocha tests/*.test.js --exit",
     "dojot": "node lib/sample.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dojot/dojot-module-nodejs.git"
+  },
   "keywords": [
-    "dojot"
+    "dojot",
+    "iot"
   ],
   "author": "Muhamed Avila",
+  "bugs": {
+    "url": "https://github.com/dojot/dojot-module-nodejs/issues"
+  },
+  "homepage": "https://github.com/dojot/dojot-module-nodejs/#readme",
   "license": "GPL-3.0",
   "dependencies": {
     "axios": "^0.18.0",
