@@ -13,4 +13,5 @@ install:
   - npm i
 
 script:
-  - npm run test
+  - docker build -t dojot/dojot-module_tests -f ./tests/docker/DockerFile .
+  - docker-compose -f ./tests/docker/docker-compose.yml up -d
