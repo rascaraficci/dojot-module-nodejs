@@ -1,5 +1,3 @@
-import * as winston from "winston";
-
 declare module '@dojot/dojot-module' {
     class Messenger {
         public constructor(name: string, config?: any);
@@ -50,7 +48,4 @@ declare module '@dojot/dojot-module' {
         commit(): void;
         disconnect(): Promise<any>;
     }
-
-    var logger: winston.Logger;
-    var loggerRoute: (app: any, filename: string) => void;
 }
