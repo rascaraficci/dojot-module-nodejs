@@ -27,10 +27,9 @@
     "moment": "^2.22.2",
     "node-rdkafka": "^2.3.4",
     "uuid": "^3.3.2",
-    "winston": "^3.0.0"
+    "@dojot/dojot-module-logger": "0.0.1-alpha.1"
   },
   "devDependencies": {
-    "@chrisalderson/winston-spy": "^1.0.2",
     "assume": "^2.1.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
