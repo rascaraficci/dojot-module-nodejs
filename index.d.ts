@@ -5,6 +5,7 @@ declare module '@dojot/dojot-module' {
         public on(subject: string, event: string, callback: (tenant: string, data: any) => void): void;
         public createChannel(subject: string, mode?: "r" | "w" | "rw", isGlobal?: boolean, config?: any): void;
         public publish(subject: string, tenant:string, message:any): void;
+        public init(): Promise<void>;
     }
 
     class Auth {
