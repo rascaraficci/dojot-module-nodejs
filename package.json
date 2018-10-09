@@ -1,6 +1,6 @@
 {
   "name": "@dojot/dojot-module",
-  "version": "0.0.1-alpha.5",
+  "version": "0.0.1-alpha.6",
   "description": "A library that provides utilities and methods for dojot",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "moment": "^2.22.2",
     "node-rdkafka": "^2.3.4",
     "uuid": "^3.3.2",
-    "@dojot/dojot-module-logger": "0.0.1-alpha.1"
+    "@dojot/dojot-module-logger": "0.0.1-alpha.2"
   },
   "devDependencies": {
     "assume": "^2.1.0",
