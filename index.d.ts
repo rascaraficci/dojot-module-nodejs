@@ -6,6 +6,7 @@ declare module '@dojot/dojot-module' {
         public createChannel(subject: string, mode?: "r" | "w" | "rw", isGlobal?: boolean): void;
         public publish(subject: string, tenant:string, message:any): void;
         public init(): Promise<void>;
+        public generateDeviceCreateEventForActiveDevices(): void;
     }
 
     class Auth {
