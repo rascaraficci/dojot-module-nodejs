@@ -68,7 +68,7 @@ function subscribeToSubjects(messenger) {
 }
 
 // Initialize messenger
-messenger.init().then(subscribeToSubjects(messenger));
+messenger.init().then(() => {subscribeToSubjects(messenger); });
 
 ```
 
@@ -77,7 +77,7 @@ which is set in `config.dojot.subjects.deviceData` default configuration
 structure, and a particular for this example which is `iotagent-info`.
 
 In order to work properly, there are a few things that must be set before
-starting the client. These are the evironment variables that are used by this
+starting the client. These are messenger.init().then(() => {subscribeToSubjects(messenger); });the evironment variables that are used by this
 library:
 
 - KAFKA_HOSTS: The list of Kafka hosts which this library will try to connect
