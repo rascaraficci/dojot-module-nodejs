@@ -57,7 +57,7 @@ function subscribeToSubjects(messenger) {
     let i = 0;
     let sendMessage = () => {
       i++;
-      let msg = "iotagent - info is this lalaaal" + i;
+      let msg = "iotagent - info " + i;
       console.log('oii');
       messenger.publish("iotagent-info", "dojot-management", msg);
       setTimeout(() => {
