@@ -124,6 +124,7 @@ this.messenger.on(dojotConfig.dojot.subjects.devices, "message", (tenant, msg) =
         parsed = JSON.parse(msg);
     } catch (e) {
         console.error("[iota] Device event is not valid json. Ignoring.");
+        return;
     }
     let eventType = `device.${parsed.event}`;
     this.messenger.emit("iotagent.device", tenant, eventType, parsed);
