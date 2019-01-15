@@ -2,6 +2,18 @@
 
 Common library to be used in dojot modules.
 
+## Overview
+
+This library is intended to handle all the necessary operations that a service
+needs to perform in order to communicate with other dojot services. These
+operations are:
+
+- Sending and receiving messages via Kafka;
+- Subscribing to new Kafka topics whenever a new tenant is created;
+
+Thus, the service should only inform the library of which subjects it is
+interested in and how the messages should be processed.
+
 ## How to install
 
 Installing this package is no different than any other from npm. Just execute:
@@ -32,112 +44,107 @@ it receives from a particular subject.
 var dojot = require("@dojot/dojot-module");
 var logger = require("@dojot/dojot-module-logger").logger;
 
-var messenger = new dojot.Messenger("sample");
 var config = dojot.Config;
+var messenger = new dojot.Messenger("dojot-snoop", config);
+messenger.init();
 
-function subscribeToSubjects(messenger) {
+// Create a channel using a default subject "device-data"
+// These "communication channels" will handle all the tenant processing and
+// message receival, so that the service implementation would only set the
+// message processing callback (done by 'messenger.on' calls).
+//
+// Creating a new channel will inform the library that the service is interested
+// in read/write messages to a particular subject.
+messenger.createChannel(config.dojot.subjects.deviceData, "rw");
 
-    // This will create "communication channels"
-    messenger.createChannel("device-data", "rw");
-    messenger.createChannel("iotagent-info", "rw");
+// Create a channel using a particular subject "service-status"
+messenger.createChannel("service-status", "w");
 
-    messenger.on(config.dojot.subjects.deviceData, "message", (tenant, msg) => {
-    logger.info(`Client: Received message in device data subject.`);
-    logger.info(`Client: Tenant is: ${tenant}`);
-    logger.info(`Client: Message is: ${msg}`);
-    });
+// Register callback to process incoming device data
+messenger.on(config.dojot.subjects.deviceData, "message", (tenant, msg) => {
+  logger.info(`Client: Received message in device data subject.`);
+  logger.info(`Client: Tenant is: ${tenant}`);
+  logger.info(`Client: Message is: ${msg}`);
+});
 
-    messenger.on("iotagent-info", "message", (tenant, msg) => {
-    logger.info(`Client: Received message in iotagent-info subject.`);
-    logger.info(`Client: Tenant is: ${tenant}`);
-    logger.info(`Client: Message is: ${msg}`);
-    });
-
-
-    let i = 0;
-    let sendMessage = () => {
-      i++;
-      let msg = "iotagent - info " + i;
-      messenger.publish("iotagent-info", "dojot-management", msg);
-      setTimeout(() => {
-        sendMessage();
-      }, 10000);
-    };
-
-    sendMessage();
-}
-
-// Initialize messenger
-messenger.init().then(() => {subscribeToSubjects(messenger); });
+// Publish a message on "service-status" subject using "dojot-management" tenant
+messenger.publish("service-status", config.management.tenant, "service X is up");
 
 ```
 
-This sample code will only subscribe to two subjects: `dojot.device-manager.devices`,
-which is set in `config.dojot.subjects.deviceData` default configuration
-structure, and a particular for this example which is `iotagent-info`.
-
-In order to work properly, there are a few things that must be set before
-starting the client. These are messenger.init().then(() => {subscribeToSubjects(messenger); });the evironment variables that are used by this
-library:
-
-- KAFKA_HOSTS: The list of Kafka hosts which this library will try to connect
-  to. This is a comma separated list, such as `kafka1:9092,kafka2:9092`;
-- DATA_BROKER_URL: this is where DataBroker can be accessed, such as
-  `http://data-broker`;
-- AUTH_URL: where Auth service can be accessed. This is its full URL, such as
-  `http://auth:5000/`;
-- DEVICE_MANAGER_URL: where DeviceManager can be accessed. This is its full
-  URL, such as `http://device-manager:5000`.
-
-There are a bunch of other environment variables that can be used to fine tune
-the library. You can check them in config.js file.
 
 
-## How to emit new events
+## Configuration
 
-As said before, the Messenger class has a very simple event generation and
-subscription mechanism. This can be explored by higher level libraries so that
-they generate new events specifically tailored for its use cases. For instance,
-dojot's own iotagent-nodejs is able to generate device-related events not only
-when a message is received from DeviceManager via Kafka, but also when the
-module is starting up and then it needs to known which devices are already
-configured. It only creates a subscription to the event iotagent-nodejs uses
-for device-related events and then asks the library to regenerate all events
-based on pre-existing devices.
+This library might be configured in different ways. Each class (Messenger,
+Consumer and Producer) receives a configuration object in its constructor. It
+should have the following attributes at least:
 
-In order to create a subscription, just check the following example. The
-subscritpion is created in `Messenger.on()` calls. Generating an event is also
-easy. All it takes is to call `Messenger.emit()` with the following parameters:
-
-- subject: the subject which will be associated to this event;
-- tenant: the tenant associated to this event;
-- event: the event being generated. This is an arbitrary string. Thus, as long
-  as the developer keeps it documentend, it can be anything.
-- data: the data associated to the event.
-
-An example of such generation:
-
-```javascript
-this.messenger.on(dojotConfig.dojot.subjects.devices, "message", (tenant, msg) => {
-    let parsed = null;
-    try {
-        parsed = JSON.parse(msg);
-    } catch (e) {
-        console.error("[iota] Device event is not valid json. Ignoring.");
-        return;
+```json
+{
+  "kafka": {
+    "producer": {
+      "metadata.brokers.list": "kafka:9092",
+      "socket.keepalive.enable": true,
+      "dr_cb": true
+    },
+    "consumer": {
+      "group.id": "sample-group",
+      "metadata.brokers.list": "kafka:9092",
     }
-    let eventType = `device.${parsed.event}`;
-    this.messenger.emit("iotagent.device", tenant, eventType, parsed);
-});
+  },
+  "databroker": {
+    "url": "http://data-broker",
+    "timeoutSleep": 2,
+    "connectionRetries": 5,
+  },
+  "auth": {
+    "url": "http://auth:5000",
+    "timeoutSleep": 5,
+    "connectionRetries": 5,
+  },
+  "deviceManager": {
+    "url": "http://device-manager:5000",
+    "timeoutSleep": 5,
+    "connectionRetries": 3,
+  },
+  "dojot": {
+    "management": {
+      "user": "dojot-management",
+      "tenant": "dojot-management"
+    },
+    "subjects": {
+      "tenancy": "dojot.tenancy",
+      "devices": "dojot.device-manager.device",
+      "deviceData": "device-data",
+    }
+  }
+}
 ```
 
-This is actually copyied directly from @dojot/iotagent-nodejs code. All it does
-is to register a callback for devices subject, parse the content, and emit a new
-event, e.g. "device.created", for subject "iotagent.device". So a component
-using this library would just create a subscription to this subject:
+All these parameters can be found in [config.js](./lib/config.js) file. It is
+recommended that the service implementation use this file as basis to configure
+other classes.
 
-```javascript
-this.messenger.on("iotagent.device", "device.create", (tenant, msg) => {
-    console.log(`Device created: ${device.label}`);
-});
+The Kafka section follows the parameters used by
+[node-rdkafka](https://github.com/Blizzard/node-rdkafka) library, which in turn
+follows the configuration of
+[librdkafka](https://github.com/edenhill/librdkafka). These are the bare
+minumum that this library needs in order to operate correctly. All the values
+are the default ones, they might be changed depending on deployment scenario.
+
+The config.js file will also get a few environment variables in order to ease
+configuration. They are:
+
+```bash
+export KAFKA_HOSTS = "kafka:9092"
+export KAFKA_GROUP_ID = "dojot-module"
+export DATA_BROKER_URL = "http://data-broker"
+export AUTH_URL = "http://auth:5000"
+export DEVICE_MANAGER_URL = "http://device-manager:5000"
+export DOJOT_MANAGEMENT_USER = "dojot-management"
+export DOJOT_MANAGEMENT_TENANT = "dojot-management"
+export DOJOT_SUBJECT_TENANCY = "dojot.tenancy"
+export DOJOT_SUBJECT_DEVICES = "dojot.device-manager.device"
+export DOJOT_SUBJECT_DEVICE_DATA = "device-data"
 ```
