@@ -7,7 +7,7 @@ describe("Creating producer", () => {
     let producer;
 
     beforeEach(() => {
-        producer = new Producer(config.kafka.consumer);
+        producer = new Producer(config);
     });
 
     it("Initing producer", (done) => {

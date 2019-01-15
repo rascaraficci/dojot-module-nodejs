@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha tests/unit-tests/*.test.js --exit",
-    "dojot": "node lib/sample.js",
+    "mocks": "node ./tests/dojot-mock.js",
+    "sample": "node lib/sample.js",
     "docs": "jsdoc -R ./README.md -p ./package.json -r -d ./docs --access all ./lib -c ./jsdoc.conf"
   },
   "repository": {
@@ -34,7 +35,7 @@
     "assume": "^2.1.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
-    "expect": "^23.4.0",
+    "expect": "23.6.0",
     "jsdoc": "3.5.5",
     "mocha": "^5.2.0",
     "sinon": "^6.1.4"

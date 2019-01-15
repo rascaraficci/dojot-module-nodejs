@@ -9,10 +9,25 @@ cache:
   directories:
     - node_modules
 
+services:
+  - docker
+
+env:
+  global:
+    - KAFKA_HOSTS="localhost:9092"
+    - KAFKA_GROUP_ID="sample-travis"
+    - LOCALHOST_MOCK="http://localhost:5002"
+    - DATA_BROKER_URL=${LOCALHOST_MOCK}
+    - AUTH_URL=${LOCALHOST_MOCK}
+    - DEVICE_MANAGER_URL=${LOCALHOST_MOCK}
+
 install:
   - npm install
-  - apt-get install kafkacat
 
 script:
-  - docker build -t dojot/dojot-module_tests -f ./tests/docker/DockerFile .
-  - docker-compose -f ./tests/docker/docker-compose.yml up -d
+  - docker network create kafkanet
+  - docker run -d --network kafkanet --publish 2181:2181 --name zookeeper zookeeper:3.4
+  - docker run -d --name kafka --network kafkanet --publish 9092:9092 --publish 7203:7203 --env ZOOKEEPER_IP=zookeeper --env JAVA_OPTS="-Xms256m -Xmx512" --env KAFKA_ADVERTISED_HOST_NAME=127.0.0.1 ches/kafka
+  - sleep 10
+  - npm run mocks &
+  - npm run test

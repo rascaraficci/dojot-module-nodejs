@@ -5,30 +5,29 @@ const expect = require('expect');
 describe('Create consumer', () => {
     let consumer;
 
-    beforeEach(() => {
-        consumer = new Consumer(config.kafka.consumer);
+    before((done) => {
+        consumer = new Consumer(config, "sample-config");
+        done();
     });
 
-    it("Initiate consumer", () => {
-        return expect(consumer).toBeTruthy();
+    it("should create a valid consumer", () => {
+        expect(consumer).toBeTruthy();
     });
 
     describe('Connecting/Disconnecting consumer', () => {
-        it("Successful connecting the consumer", (done) => {
+        it("should connect consumer successfully.", (done) => {
             consumer.connect().then(() => {
-                consumer.disconnect().then(() => { done() });
-            });
-        });
-    });
+                console.log("Consumer successfully connected. Disconnecting it.");
+                consumer.disconnect().then(() => {
 
-    describe('Consume!', () => {
-        it("Succesful consume a message", (done) => {
-            const messages = 5;
-            consumer.connect().then(() => {
-
-                consumer.consume(messages).then(() => {
-                    consumer.disconnect().then(() => { done() });
-                })
+                    done();
+                }).catch((error) => {
+                    console.log(`Error: ${error}`);
+                    done(error);
+                });
+            }).catch((error) => {
+                console.log(`Error: ${error}`);
+                done(error);
             });
         });
     });

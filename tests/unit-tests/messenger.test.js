@@ -7,33 +7,48 @@ describe('Create messenger', () => {
 
     let messenger;
 
-    beforeEach(() => {
+    before((done) => {
         messenger = new dojot.Messenger("sample");
+        messenger.init().then(() => {
+            done();
+        }).catch((error) => {
+            console.log(`Error: ${error}`);
+            done(error);
+        });
     });
 
-    it('get tenant returned by auth', (done) => {
-        auth.getTenants(config.auth.host).then(tenant => {
+    it('should retrieve tenants from auth service', (done) => {
+        auth.getTenants(config.auth.url).then(tenant => {
             expect(tenant).toEqual(['admin']);
             done();
-        })
-    })
+        }).catch((error) => {
+            console.log(`Error: ${error}`);
+            done(error);
+        });
+    });
 
-    it("Connect producer and consumer for messenger", () => {
+    it("should create valid producer and consumer", () => {
         expect(messenger.producer).toBeDefined();
         expect(messenger.consumer).toBeDefined();
     });
 
-    it("Should get tenants", () => {
+    it("should retrieve tenants from Kafka", (done) => {
         messenger.emit('dojot.tenancy', 'admin', 'message', JSON.stringify({ tenant: 'test' }));
         expect(messenger.tenants.length).toBeGreaterThan(0);
-        expect(messenger.tenants[0]).toEqual('test');
+        console.log(messenger.tenants);
+        expect(messenger.tenants).toContain('test');
+        messenger._tenancyConsumer.disconnect();
+        messenger.consumer.disconnect();
+        done();
     });
 
     it("Should get correct topics", (done) => {
-        messenger.topicManager.getTopic('dojot-tenancy', 'dojot-management', config.databroker.host, true).then(topic => {
+        messenger.topicManager.getTopic('dojot-tenancy', 'dojot-management', config.databroker.url, true).then(topic => {
             expect(topic).toBeDefined();
             done();
-
+        }).catch((error) => {
+            console.log(`Error: ${error}`);
+            done(error);
         });
     })
 
@@ -48,11 +63,4 @@ describe('Create messenger', () => {
         messenger.emit('iotagent-info', 'admin', 'message', 'test');
     });
 
-    afterEach((done) => {
-        messenger.producer.disconnect().then(() => {
-            messenger.consumer.disconnect().then(() => {
-                done();
-            })
-        });
-    });
 });
