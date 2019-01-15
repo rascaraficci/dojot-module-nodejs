@@ -10,7 +10,8 @@ cache:
     - node_modules
 
 install:
-  - npm i
+  - npm install
+  - apt-get install kafkacat
 
 script:
   - docker build -t dojot/dojot-module_tests -f ./tests/docker/DockerFile .

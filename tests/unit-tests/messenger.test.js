@@ -1,7 +1,7 @@
-const dojot = require('../lib/messenger');
-const config = require('../lib/config');
+const dojot = require('../../lib/messenger');
+const config = require('../../lib/config');
 const expect = require('expect');
-const auth = require('../lib/auth');
+const auth = require('../../lib/auth');
 
 describe('Create messenger', () => {
 

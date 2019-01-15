@@ -1,5 +1,5 @@
-const Consumer = require('../lib/kafka/Consumer');
-const config = require('../lib/config');
+const Consumer = require('../../lib/kafka/Consumer');
+const config = require('../../lib/config');
 const expect = require('expect');
 
 describe('Create consumer', () => {
