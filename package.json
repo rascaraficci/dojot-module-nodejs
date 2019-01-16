@@ -4,8 +4,10 @@
   "description": "A library that provides utilities and methods for dojot",
   "main": "index.js",
   "scripts": {
-    "test": "mocha tests/*.test.js --exit",
-    "dojot": "node lib/sample.js"
+    "test": "mocha tests/unit-tests/*.test.js --exit",
+    "mocks": "node ./tests/dojot-mock.js",
+    "sample": "node lib/sample.js",
+    "docs": "jsdoc -R ./README.md -p ./package.json -r -d ./docs --access all ./lib -c ./jsdoc.conf"
   },
   "repository": {
     "type": "git",
@@ -25,7 +27,7 @@
     "axios": "^0.18.0",
     "express": "^4.16.3",
     "moment": "^2.22.2",
-    "node-rdkafka": "^2.3.4",
+    "node-rdkafka": "2.5.1",
     "uuid": "^3.3.2",
     "@dojot/dojot-module-logger": "0.0.1-alpha.2"
   },
@@ -33,7 +35,8 @@
     "assume": "^2.1.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
-    "expect": "^23.4.0",
+    "expect": "23.6.0",
+    "jsdoc": "3.5.5",
     "mocha": "^5.2.0",
     "sinon": "^6.1.4"
   }
