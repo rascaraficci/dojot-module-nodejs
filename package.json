@@ -40,5 +40,9 @@
     "jsdoc": "3.5.5",
     "mocha": "^5.2.0",
     "sinon": "^6.1.4"
+  },
+  "jest": {
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   }
 }
