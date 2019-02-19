@@ -158,7 +158,7 @@ describe("Kafka producer", () => {
 
                 Promise.all([connectPromiseError, callbackPromiseError, postErrorCallbackAnalysis]).then(() => {
                     done("error - promise should be rejected");
-                }).catch((error) => {
+                }).catch(() => {
                     done();
                 });
             }).catch((error) => {
@@ -360,7 +360,7 @@ describe("Kafka producer", () => {
                 expect(mockKafka.producer.flush).not.toHaveBeenCalled();
                 expect(mockKafka.producer.disconnect).not.toHaveBeenCalled();
                 done();
-            }).catch((error) => {
+            }).catch(() => {
                 done("promise should be resolved.");
             });
             // << Results verification
@@ -372,7 +372,7 @@ describe("Kafka producer", () => {
 
             // >> Tested code
             const producer = new Producer(mockConfig);
-            const prodPromise = producer.produce("sample-topic-prod", "sample-msg-prod", "sample-key", "sample-partition");
+            producer.produce("sample-topic-prod", "sample-msg-prod", "sample-key", "sample-partition");
             // << Tested code
 
             expect(mockKafka.producer.produce).toBeCalledWith("sample-topic-prod",
@@ -387,7 +387,7 @@ describe("Kafka producer", () => {
 
             // >> Tested code
             const producer = new Producer(mockConfig);
-            const prodPromise = producer.produce("sample-topic-prod-default", "sample-msg-prod-default");
+            producer.produce("sample-topic-prod-default", "sample-msg-prod-default");
             // << Tested code
 
             expect(mockKafka.producer.produce).toBeCalledWith("sample-topic-prod-default",

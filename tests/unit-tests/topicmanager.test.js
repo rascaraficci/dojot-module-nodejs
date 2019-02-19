@@ -9,7 +9,6 @@
  */
 
 const TopicManager = require("../../lib/kafka/TopicManager");
-const Auth = require("../../lib/auth");
 const axios = require("axios");
 const config = require("../../lib/config");
 
