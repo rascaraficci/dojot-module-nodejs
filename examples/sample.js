@@ -19,12 +19,5 @@ messenger.on(config.dojot.subjects.deviceData, "message", (tenant, msg) => {
   logger.info(`Client: Message is: ${msg}`);
 });
 
-let callbackId = messenger.on("dojot.notifications", "message", (ten, msg) => {
-  logger.info("Registered callback for dojot notifications")
-  messenger.unregisterCallback("dojot.notifications", "message", callbackId)
-})
-
-logger.info("AAAAAAA")
-
 // Publish a message on "service-status" subject using "dojot-management" tenant
 messenger.publish("service-status", config.dojot.management.tenant, "service X is up");
