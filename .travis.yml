@@ -23,6 +23,7 @@ env:
 
 install:
   - npm install
+  - npm install -g codecov
 
 script:
   - npm run docs
@@ -32,6 +33,7 @@ script:
   - sleep 10
   - npm run mocks &
   - npm run test
+  - codecov
 
 deploy:
   provider: pages
