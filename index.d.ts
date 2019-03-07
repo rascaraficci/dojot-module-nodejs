@@ -2,7 +2,7 @@ declare module '@dojot/dojot-module' {
     class Messenger {
         public constructor(name: string, config?: any);
         public emit(subject: string, tenant: string, event: string, data: any): void;
-        public on(subject: string, event: string, callback: (tenant: string, data: any) => void, callbackId?: string): any;
+        public on(subject: string, event: string, callback: (tenant: string, data: any) => void, callbackId?: string): string;
         public createChannel(subject: string, mode?: "r" | "w" | "rw", isGlobal?: boolean): void;
         public publish(subject: string, tenant:string, message:any): void;
         public init(): Promise<void>;
