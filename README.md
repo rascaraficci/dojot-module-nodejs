@@ -153,3 +153,4 @@ export DOJOT_SUBJECT_TENANCY = "dojot.tenancy"
 export DOJOT_SUBJECT_DEVICES = "dojot.device-manager.device"
 export DOJOT_SUBJECT_DEVICE_DATA = "device-data"
 ```
+
