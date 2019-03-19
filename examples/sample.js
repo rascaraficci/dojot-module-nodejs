@@ -1,9 +1,9 @@
 "use strict";
-var dojot = require("@dojot/dojot-module");
+var Messenger = require('../lib/messenger').Messenger;
+var config = require('../lib/config')
 var logger = require("@dojot/dojot-module-logger").logger;
 
-var config = dojot.Config;
-var messenger = new dojot.Messenger("dojot-snoop", config);
+var messenger = new Messenger("dojot-snoop", config);
 messenger.init();
 
 // Create a channel using a default subject "device-data"
@@ -20,4 +20,4 @@ messenger.on(config.dojot.subjects.deviceData, "message", (tenant, msg) => {
 });
 
 // Publish a message on "service-status" subject using "dojot-management" tenant
-messenger.publish("service-status", config.management.tenant, "service X is up");
+messenger.publish("service-status", config.dojot.management.tenant, "service X is up");
