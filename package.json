@@ -1,6 +1,6 @@
 {
   "name": "@dojot/dojot-module",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.1-beta.4",
   "description": "A library that provides utilities and methods for dojot",
   "main": "index.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
     "collectCoverageFrom": [
-        "lib/**/*.js"
+      "lib/**/*.js"
     ]
   }
 }
