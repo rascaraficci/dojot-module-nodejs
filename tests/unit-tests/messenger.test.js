@@ -32,3 +32,37 @@ describe("Testing messenger unregister method", () => {
   })
   
 })
+
+describe("Testing tenant callback function", () => {
+  
+  it("should add a new tenant to cache then remove it", () => {
+    const messenger = new Messenger("Test-Mesenger")
+    
+    // test create
+    const newTenant = { type: "CrEaTe", tenant: "messenger" };
+    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+    expect(messenger.tenants.length).toEqual(1);
+    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+    expect(messenger.tenants.length).toEqual(1);
+
+    // test delete
+    newTenant.type = "dELETe";
+    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+    expect(messenger.tenants.length).toEqual(0);
+    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+    expect(messenger.tenants.length).toEqual(0);
+
+    newTenant.type = "do-nothing";
+    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+    expect(messenger.tenants.length).toEqual(0);
+
+    // errors
+    const badJSONString = "{},"
+    messenger._processTenantCallback("messenger.tenant", badJSONString);
+    expect(messenger.tenants.length).toEqual(0);
+
+    const emptyJSONString = `{"tenant":"jonas"}`
+    messenger._processTenantCallback("messenger.tenant", emptyJSONString);
+    expect(messenger.tenants.length).toEqual(0);
+  })  
+})
