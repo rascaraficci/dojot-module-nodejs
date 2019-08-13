@@ -102,11 +102,11 @@ describe("Kafka Producer", () => {
 
       // >> Tested code
       const messenger = new Messenger("Test-messenger", mockConfig);
-      messenger.producer = Kafka.producerMock
-      messenger.consumer = Kafka.consumerMock
-      messenger._tenancyConsumer = Kafka.consumerMock
+      messenger.producer = Kafka.producerMock;
+      messenger.consumer = Kafka.consumerMock;
+      messenger._tenancyConsumer = Kafka.consumerMock;
 
-      messenger._initTenancyConsumer = jest.fn(() => {Promise.resolve()})
+      messenger._initTenancyConsumer = jest.fn(() => Promise.resolve());
       
       messenger.init().then(() => {
         // >> Results verification
@@ -130,9 +130,10 @@ describe("Kafka Producer", () => {
       
       const messenger = new Messenger("Test-messenger", mockConfig);
       
-      messenger.producer = Kafka.producerMock
-      messenger.consumer = Kafka.consumerMock
-      messenger._tenancyConsumer = Kafka.consumerMock
+      messenger._initTenancyConsumer = jest.fn(() => Promise.reject());
+      messenger.producer = Kafka.producerMock;
+      messenger.consumer = Kafka.consumerMock;
+      messenger._tenancyConsumer = Kafka.consumerMock;
       // << Tested code
 
       // >> Tested code
@@ -145,90 +146,142 @@ describe("Kafka Producer", () => {
     })
   })
 
-})
+  describe("Testing messenger unregister method", () => {
 
-describe("Testing messenger on method", () => {
-
-  it("Should add callback", () => {
-    const messenger = new Messenger("Test-Messenger")
-    messenger.on("device-data", "message", "myCallBack", "12345")
-    expect(messenger.eventCallbacks['device-data']['message']['12345']).toEqual('myCallBack');
-  })
-
-  it("Should add callback and return callback ID", () => {
-    const messenger = new Messenger("Test-Messenger")
-    let callbackId = messenger.on("device-data", "message", "myCallBack")
-    expect(messenger.eventCallbacks['device-data']['message']).toBeDefined();
-    expect(callbackId).toBeDefined();
-  })
-
-})
-
-describe("Testing tenancy consumer init", () => {
-
-  it("should register tenancy sucessfully", async () => {
-
-    // >> Tested code
-    const messenger = new Messenger("Test-messenger", config);
-    messenger.topicManager.getTopic = jest.fn(() => {return Promise.resolve('test')});
-
-    messenger.producer = Kafka.producerMock
-    messenger.consumer = Kafka.consumerMock
-    messenger._tenancyConsumer = Kafka.consumerMock
-    messenger._processKafkaMessages = jest.fn()
-
-    await messenger._initTenancyConsumer();
-
-    expect(messenger.topics[0]).toEqual('test');
-
-  })
-})
-
-describe("Testing messenger unregister method", () => {
-
-  it("should unregister callback", () => {
-    const messenger = new Messenger("Test-Messenger")
-    messenger.eventCallbacks['device-data'] = {}
-    messenger.eventCallbacks['device-data']['message'] = {}
-    messenger.eventCallbacks['device-data']['message']['12345'] = "myCallBack"
-
-    messenger.unregisterCallback("device-data", "message", "12345")
-    expect(messenger.eventCallbacks['device-data']['message']['12345']).toBeUndefined();
-
-  })
+    it("should unregister callback", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.eventCallbacks['device-data'] = {}
+      messenger.eventCallbacks['device-data']['message'] = {}
+      messenger.eventCallbacks['device-data']['message']['12345'] = "myCallBack"
   
-})
+      messenger.unregisterCallback("device-data", "message", "12345")
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).toBeUndefined();
+    })
 
-describe("Testing tenant callback function", () => {
+    it("should fail on unregister method because of subject", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.eventCallbacks['device-data'] = {}
+      messenger.eventCallbacks['device-data']['message'] = {}
+      messenger.eventCallbacks['device-data']['message']['12345'] = "my-callback"
   
-  it("should add a new tenant to cache then remove it", () => {
-    const messenger = new Messenger("Test-Mesenger")
-    
-    // test create
-    const newTenant = { type: "CrEaTe", tenant: "messenger" };
-    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
-    expect(messenger.tenants.length).toEqual(1);
-    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
-    expect(messenger.tenants.length).toEqual(1);
+      messenger.unregisterCallback("no-device-data", "message", "12345")
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).toEqual("my-callback");
+    })
 
-    // test delete
-    newTenant.type = "dELETe";
-    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
-    expect(messenger.tenants.length).toEqual(0);
-    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
-    expect(messenger.tenants.length).toEqual(0);
+    it("should fail on unregister method because of event", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.eventCallbacks['device-data'] = {}
+      messenger.eventCallbacks['device-data']['message'] = {}
+      messenger.eventCallbacks['device-data']['message']['12345'] = "my-callback"
+  
+      messenger.unregisterCallback("device-data", "no-message", "12345")
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).toEqual("my-callback");
+    })
 
-    newTenant.type = "do-nothing";
-    messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
-    expect(messenger.tenants.length).toEqual(0);
-
-    // errors
-    const badJSONString = "{},"
-    messenger._processTenantCallback("messenger.tenant", badJSONString);
-    expect(messenger.tenants.length).toEqual(0);
-
-    const emptyJSONString = `{"tenant":"jonas"}`
-    messenger._processTenantCallback("messenger.tenant", emptyJSONString);
-    expect(messenger.tenants.length).toEqual(0);
+    it("should fail on unregister method because of callbackId", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.eventCallbacks['device-data'] = {}
+      messenger.eventCallbacks['device-data']['message'] = {}
+      messenger.eventCallbacks['device-data']['message']['12345'] = "my-callback"
+  
+      messenger.unregisterCallback("device-data", "message", "no-12345")
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).toEqual("my-callback");
+    })
   })
+
+  describe("Testing messenger on method", () => {
+
+    it("Should add callback", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.on("device-data", "message", "myCallBack", "12345")
+      messenger.on("device-data", "message", "myCallBack-1", "12345-1")
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).toEqual('myCallBack');
+      expect(messenger.eventCallbacks['device-data']['message']['12345-1']).toEqual('myCallBack-1');
+    })
+  
+    it("Should add callback and return callback ID", () => {
+      const messenger = new Messenger("Test-Messenger")
+      let callbackId = messenger.on("device-data", "message", "myCallBack")
+      expect(messenger.eventCallbacks['device-data']['message']).toBeDefined();
+      expect(callbackId).toBeDefined();
+    })
+  })
+
+  describe("Testing emiting message fro all subscribers", () => {
+
+    const emitEventCallbackMock = jest.fn( (tenant, data) => { return { tenant, data }})
+
+    it("should emit a message", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.eventCallbacks['device-data'] = {}
+      messenger.eventCallbacks['device-data']['message'] = {}
+      messenger.eventCallbacks['device-data']['message']['12345'] = emitEventCallbackMock;
+      messenger.emit("device-data", "my-tenant", "message", { "data": "message-data"})
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).lastCalledWith("my-tenant", { "data": "message-data"});
+    })
+
+    it("should not emit a message", () => {
+      const messenger = new Messenger("Test-Messenger")
+      messenger.eventCallbacks['device-data'] = {}
+      messenger.eventCallbacks['device-data']['no-message'] = {}
+      messenger.eventCallbacks['device-data']['no-message']['12345'] = emitEventCallbackMock;
+      messenger.emit("device-data", "my-tenant", "message", { "data": "message-data"})
+      expect(messenger.eventCallbacks['device-data']['message']).toBeUndefined();
+    })
+  })
+
+  describe("Testing tenancy consumer init", () => {
+
+    it("should register tenancy sucessfully", async () => {
+  
+      // >> Tested code
+      const messenger = new Messenger("Test-messenger", config);
+      messenger.topicManager.getTopic = jest.fn(() => {return Promise.resolve('test')});
+  
+      messenger.producer = Kafka.producerMock
+      messenger.consumer = Kafka.consumerMock
+      messenger._tenancyConsumer = Kafka.consumerMock
+      messenger._processKafkaMessages = jest.fn()
+  
+      await messenger._initTenancyConsumer();
+  
+      expect(messenger.topics[0]).toEqual('test');
+  
+    })
+  })
+
+  describe("Testing tenant callback function", () => {
+  
+    it("should add a new tenant to cache then remove it", () => {
+      const messenger = new Messenger("Test-Mesenger")
+      
+      // test create
+      const newTenant = { type: "CrEaTe", tenant: "messenger" };
+      messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+      expect(messenger.tenants.length).toEqual(1);
+      messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+      expect(messenger.tenants.length).toEqual(1);
+  
+      // test delete
+      newTenant.type = "dELETe";
+      messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+      expect(messenger.tenants.length).toEqual(0);
+      messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+      expect(messenger.tenants.length).toEqual(0);
+  
+      newTenant.type = "do-nothing";
+      messenger._processTenantCallback("messenger.tenant", JSON.stringify(newTenant));
+      expect(messenger.tenants.length).toEqual(0);
+  
+      // errors
+      const badJSONString = "{},"
+      messenger._processTenantCallback("messenger.tenant", badJSONString);
+      expect(messenger.tenants.length).toEqual(0);
+  
+      const emptyJSONString = `{"tenant":"jonas"}`
+      messenger._processTenantCallback("messenger.tenant", emptyJSONString);
+      expect(messenger.tenants.length).toEqual(0);
+    })
+  })
+
 })
