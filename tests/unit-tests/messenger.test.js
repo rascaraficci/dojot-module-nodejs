@@ -47,11 +47,7 @@ const Kafka = {
   }
 }
 
-jest.useFakeTimers();
-
 describe("Kafka Producer", () => {
-
-  
 
   const mockConfig = config;
 
