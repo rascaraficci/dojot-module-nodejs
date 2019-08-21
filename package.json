@@ -1,6 +1,6 @@
 {
   "name": "@dojot/dojot-module",
-  "version": "0.0.1-beta.5",
+  "version": "0.0.1-beta.6",
   "description": "A library that provides utilities and methods for dojot",
   "main": "index.js",
   "scripts": {
