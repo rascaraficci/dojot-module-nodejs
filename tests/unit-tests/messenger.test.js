@@ -280,4 +280,30 @@ describe("Kafka Producer", () => {
     })
   })
 
+  describe("Test Messenger publish function", () => {
+
+    it("should queued message beacuse producer is not ready", () => {
+      const messenger= new Messenger("sample-messenger");
+      messenger.producer.isReady = false;
+
+      const object = {
+        "key": "key-sample",                                                                                                                                                                                                                                                  
+        "message": "message-sample",                                                                                                                                                                                                                                          
+        "partition": 0,                                                                                                                                                                                                                                                       
+        "subject": "subject-sample",                                                                                                                                                                                                                                          
+        "tenant": "tenant-sample",                                                                                                                                                                                                                                            
+      }
+
+      messenger.publish("subject-sample", "tenant-sample", "message-sample", "key-sample", 0);
+      expect(messenger.queuedMessages).toEqual([object]);
+    })
+    
+    it("should not publish because subject is not in producerTopics", () => {
+      const messenger = new Messenger("Test-messenger");
+      messenger.producer = Kafka.producerMock;
+      messenger.publish("subject-sample", "tenant-sample", "message-sample","key-sample", 0);
+      expect(messenger.producer.produce).not.toHaveBeenCalled()
+    })
+  })
+
 })
