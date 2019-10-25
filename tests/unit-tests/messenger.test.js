@@ -294,7 +294,7 @@ describe("Kafka Producer", () => {
         "tenant": "tenant-sample",                                                                                                                                                                                                                                            
       }
 
-      messenger.publish("subject-sample", "tenant-sample", "message-sample", "key-sample", 0);
+      messenger.publish(object.subject, object.tenant, object.message, object.key, object.partition);
       expect(messenger.queuedMessages).toEqual([object]);
     })
     
@@ -302,6 +302,22 @@ describe("Kafka Producer", () => {
       const messenger = new Messenger("Test-messenger");
       messenger.producer = Kafka.producerMock;
       messenger.publish("subject-sample", "tenant-sample", "message-sample","key-sample", 0);
+      expect(messenger.producer.produce).not.toHaveBeenCalled()
+    })
+
+    it("should not publish message beause tenant is not in producer tocpics", () => {
+      const messenger = new Messenger("Test-messenger");
+      messenger.producer = Kafka.producerMock;
+      
+      const object = {
+        "key": "key-sample",                                                                                                                                                                                                                                                  
+        "message": "message-sample",                                                                                                                                                                                                                                          
+        "partition": 0,                                                                                                                                                                                                                                                       
+        "subject": "subject-sample",                                                                                                                                                                                                                                          
+        "tenant": "tenant-sample",                                                                                                                                                                                                                                            
+      }
+      messenger.producerTopics[object.subject] = {}
+      messenger.publish(object.subject, object.tenant, object.message, object.key, object.partition);
       expect(messenger.producer.produce).not.toHaveBeenCalled()
     })
   })
