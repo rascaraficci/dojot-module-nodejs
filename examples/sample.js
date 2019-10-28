@@ -21,3 +21,7 @@ messenger.on(config.dojot.subjects.deviceData, "message", (tenant, msg) => {
 
 // Publish a message on "service-status" subject using "dojot-management" tenant
 messenger.publish("service-status", config.dojot.management.tenant, "service X is up");
+
+// publish a message on "service-status" subject using "dojot-management" tenant 
+// on partition 1 with "sample" as key
+messenger.publish("service-status", config.dojot.management.tenant, "service X is up", "sample", 1);
