@@ -19,7 +19,7 @@ jest.mock("../../lib/kafka/Consumer");
 jest.mock("../../lib/kafka/TopicManager");
 
 jest.mock("../../lib/auth", () => ({
-  getTenants: jest.fn(() => { return Promise.resolve(['test', 'test', 'test1', 'test2'])})
+  getTenants: jest.fn(() => Promise.resolve(['test', 'test', 'test1', 'test2']))
 }));
 
 const config = require("../../lib/config");
@@ -62,7 +62,7 @@ describe("Kafka Producer", () => {
 
   afterAll(() => {
     axios.mockRestore();
-    jest.useRealTimers()
+    jest.useRealTimers();
   })
 
   describe("Messenger creation", () => {
@@ -316,9 +316,27 @@ describe("Kafka Producer", () => {
         "subject": "subject-sample",                                                                                                                                                                                                                                          
         "tenant": "tenant-sample",                                                                                                                                                                                                                                            
       }
-      messenger.producerTopics[object.subject] = {}
+      messenger.producerTopics[object.subject] = {};
       messenger.publish(object.subject, object.tenant, object.message, object.key, object.partition);
-      expect(messenger.producer.produce).not.toHaveBeenCalled()
+      expect(messenger.producer.produce).not.toHaveBeenCalled();
+    })
+
+    it("should publish a new message", () => {
+      const messenger = new Messenger("Test-messenger");
+      messenger.producer = Kafka.producerMock;
+
+      const object = {
+        "key": "key-sample",                                                                                                                                                                                                                                                  
+        "message": "message-sample",                                                                                                                                                                                                                                          
+        "partition": 0,                                                                                                                                                                                                                                                       
+        "subject": "subject-sample",                                                                                                                                                                                                                                          
+        "tenant": "tenant-sample",                                                                                                                                                                                                                                            
+      }
+      messenger.producerTopics[object.subject] = {};
+      messenger.producerTopics[object.subject][object.tenant] = object.tenant;
+      messenger.publish(object.subject, object.tenant, object.message, object.key, object.partition);
+      expect(messenger.producer.produce).toHaveBeenCalled();
+
     })
   })
 
