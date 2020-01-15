@@ -212,8 +212,8 @@ describe("Kafka Producer", () => {
       messenger.eventCallbacks['device-data'] = {}
       messenger.eventCallbacks['device-data']['message'] = {}
       messenger.eventCallbacks['device-data']['message']['12345'] = emitEventCallbackMock;
-      messenger.emit("device-data", "my-tenant", "message", { "data": "message-data"})
-      expect(messenger.eventCallbacks['device-data']['message']['12345']).lastCalledWith("my-tenant", { "data": "message-data"});
+      messenger.emit("device-data", "my-tenant", "message", { "data": "message-data"}, {})
+      expect(messenger.eventCallbacks['device-data']['message']['12345']).lastCalledWith("my-tenant", { "data": "message-data"}, {});
     })
 
     it("should not emit a message", () => {
