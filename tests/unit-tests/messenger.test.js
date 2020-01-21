@@ -244,6 +244,20 @@ describe("Kafka Producer", () => {
       expect(messenger.topics[0]).toEqual('test');
 
     })
+
+    it("should register tenancy without sucessfully, can't get topic", async (done) => {
+
+      const messenger = new Messenger("Test-messenger", config);
+      messenger.topicManager.getTopic = jest.fn(() => { return Promise.reject('error') });
+
+      try {
+        await messenger._initTenancyConsumer()
+      } catch (error) {
+        expect(error).toBeDefined();
+        done();
+      }
+
+    })
   })
 
   describe("Testing tenant callback function", () => {
