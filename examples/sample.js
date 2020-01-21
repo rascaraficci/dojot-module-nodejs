@@ -13,10 +13,11 @@ messenger.createChannel(config.dojot.subjects.deviceData, "rw");
 messenger.createChannel("service-status", "w");
 
 // Register callback to process incoming device data
-messenger.on(config.dojot.subjects.deviceData, "message", (tenant, msg) => {
+messenger.on(config.dojot.subjects.deviceData, "message", (tenant, message, extraInfo) => {
   logger.info(`Client: Received message in device data subject.`);
   logger.info(`Client: Tenant is: ${tenant}`);
-  logger.info(`Client: Message is: ${msg}`);
+  logger.info(`Client: Message is: ${message}`);
+  logger.info(`Client: ExtraInfo is: ${extraInfo}`);
 });
 
 // Publish a message on "service-status" subject using "dojot-management" tenant
