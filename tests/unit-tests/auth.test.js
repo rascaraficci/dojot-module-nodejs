@@ -121,3 +121,12 @@ describe('When it uses a configuration file', () => {
     });
 });
 
+describe('When a dummy token is requested', () => {
+
+    it('should generate a dummy token', () => {
+
+        let dummyToken = auth.getManagementToken("sample-tenant")
+        expect(dummyToken).not.toBeNull();
+    });
+});
+
