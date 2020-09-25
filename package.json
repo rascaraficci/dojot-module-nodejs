@@ -1,12 +1,13 @@
 {
   "name": "@dojot/dojot-module",
-  "version": "0.0.1-beta.6",
+  "version": "0.0.1-beta.8",
   "description": "A library that provides utilities and methods for dojot",
   "main": "index.js",
   "scripts": {
     "test": "jest tests/unit-tests/*.test.js --coverage --report=html",
+    "test:watch": "jest --watch tests/unit-tests/*.test.js --coverage --report=html",
     "mocks": "node ./tests/dojot-mock.js",
-    "sample": "node lib/sample.js",
+    "sample": "node examples/sample.js",
     "docs": "jsdoc -R ./README.md -p ./package.json -r -d ./docs --access all ./lib -c ./jsdoc.conf"
   },
   "repository": {
