@@ -437,6 +437,56 @@ describe("Kafka consumer", () => {
         expect(mockKafka.consumer.subscribe).toBeCalledWith(["sample-topic-1", "sample-topic-2"]);
         // << Results verification
     });
+
+    it("should unsubscribe sucessfully from a topic", () => {
+        
+        /**
+         * This test subscribe and unsubscribe to a topic then check if topic
+         * where deleted after unsubscribe
+         */
+
+        // >> Tested code
+        let mockCallback = "sample-mock-callback";
+        const consumer = new Consumer(mockConfig, "test-unsubscribe");
+        consumer.isReady = true;
+        consumer.subscribe("sample-subscribe", mockCallback);
+        consumer.unsubscribe("sample-subscribe");
+        // >> unsubcribe
+
+        // >> Test unsubsribe for a tenant that doenst exist
+        consumer.unsubscribe("sample-subscribe");
+        // >> end test
+
+        expect(consumer.subscriptions).toEqual([]);
+        // >> result verification
+    });
+
+    it("should remove from subcription list even consumer state", () => {
+        /**
+         * This test try to subscribe then unsubscribe 
+         * to a topic then check if topic where deleted 
+         * after unsubscribe, topic should be on subsciption list
+         * deleted even of consumer state change
+         */
+
+        // >> Tested code
+        let mockCallback = "sample-mock-callback";
+        const consumer = new Consumer(mockConfig, "test-should-remove-from-list");
+        consumer.isReady = true;
+        consumer.subscribe("sample-subscribe", mockCallback);
+        // >> end Test
+
+        expect(consumer.subscriptions).toEqual(["sample-subscribe"]);
+        // >> result verification
+
+        // >> Test code
+        consumer.isReady = false;
+        consumer.unsubscribe("sample-subscribe");
+        // >> end Test
+
+        expect(consumer.subscriptions).toEqual([]);
+        // >> result verification
+    });
     });
 
     describe("Message consumption", () => {
