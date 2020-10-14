@@ -28,7 +28,7 @@
     "@dojot/dojot-module-logger": "0.0.1-alpha.5",
     "axios": "^0.18.0",
     "express": "^4.16.3",
-    "moment": "^2.22.2",
+    "moment": "^2.29.0",
     "node-rdkafka": "2.5.1",
     "uuid": "^3.3.2"
   },
